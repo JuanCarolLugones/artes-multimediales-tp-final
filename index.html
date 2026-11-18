@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#112724" />
-  <meta name="description" content="Deriva: prototipo de exploración urbana con redes ramificadas sobre calles reales." />
-  <title>DERIVA — Cartografías que crecen</title>
+  <meta name="theme-color" content="#1f3027" />
+  <meta name="description" content="Árbol Derivado: una cartografía viva donde las calles se transforman en ramas y los recorridos nacen de una semilla." />
+  <title>Árbol Derivado — Las ramas de una ciudad</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
   <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css" />
   <link rel="stylesheet" href="styles.css" />
@@ -18,81 +18,90 @@
     <aside class="sidebar">
       <header class="brand">
         <div class="brand-mark" aria-hidden="true">
-          <svg viewBox="0 0 42 42" fill="none" stroke="currentColor" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 36V20M21 20L12 10M21 20L30 11M12 10L7 4M12 10L18 3M30 11L27 4M30 11L37 6M21 27L11 22M11 22L5 25M11 22L8 16M21 30L31 25M31 25L37 20M31 25L37 30" />
+          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M24 43V20M24 28L13 18M24 23L35 12"/>
+            <path d="M13 18C6 18 5 9 8 6c7-1 13 3 13 12M35 12c1-7 8-9 12-6 0 8-5 13-12 13"/>
+            <path d="M24 39c-5-2-9-1-12 2M24 39c5-2 9-1 12 2" opacity=".7"/>
           </svg>
         </div>
         <div>
-          <div class="wordmark">DERIVA<span class="brand-dot">.</span></div>
-          <div class="brand-sub">Cartografías que crecen</div>
+          <div class="wordmark">ÁRBOL DERIVADO<span class="brand-dot">.</span></div>
+          <div class="brand-sub">Las ramas de una ciudad</div>
         </div>
-        <span class="prototype-pill">PROTOTIPO 03</span>
+        <span class="prototype-pill">PROTOTIPO</span>
       </header>
 
       <div class="sidebar-body">
-        <div class="eyebrow"><span class="pulse-dot"></span> EXPERIENCIA GENERATIVA</div>
-        <h1>Seguir las <em>ramas</em> de la ciudad<span class="period">.</span></h1>
-        <p class="intro">Elegí un punto, ajustá la escala y dejá que el azar dibuje una red sobre calles reales.</p>
+        <div class="eyebrow"><span class="pulse-dot"></span> CARTOGRAFÍA VIVA</div>
+        <h1>Una ciudad que <em>echa ramas</em><span class="period">.</span></h1>
+        <p class="intro">Cada recorrido comienza con una semilla. Plantala en el mapa y dejá que las calles se conviertan en ramas.</p>
+        <div class="metaphor-guide" aria-label="Las tres partes de la obra">
+          <div class="metaphor-step"><span class="metaphor-icon seed-icon" aria-hidden="true">✦</span><span>Semilla<small>El origen</small></span></div>
+          <span class="metaphor-connector" aria-hidden="true"></span>
+          <div class="metaphor-step"><span class="metaphor-icon branch-icon" aria-hidden="true">⑂</span><span>Ramas<small>Los caminos</small></span></div>
+          <span class="metaphor-connector" aria-hidden="true"></span>
+          <div class="metaphor-step"><span class="metaphor-icon leaf-icon" aria-hidden="true">❧</span><span>Hojas<small>Las huellas</small></span></div>
+        </div>
 
-        <div class="section-heading"><span class="section-index">01</span><span>Definir el territorio</span></div>
+        <div class="section-heading"><span class="section-index">01</span><span>Plantar la semilla</span></div>
         <div class="field">
-          <label for="zone">Zona inicial</label>
+          <label for="zone">¿Dónde querés sembrar?</label>
           <div class="select-wrap">
             <select id="zone">
               <option value="recoleta">Recoleta · Buenos Aires</option>
               <option value="palermo">Palermo · Buenos Aires</option>
               <option value="san-telmo">San Telmo · Buenos Aires</option>
-              <option value="custom">Punto elegido en el mapa</option>
+              <option value="custom">Semilla elegida en el mapa</option>
             </select>
             <span class="chevron">⌄</span>
           </div>
-          <div class="hint"><span class="hint-symbol">↗</span> También podés tocar cualquier calle del mapa para elegir el origen.</div>
+          <div class="hint"><span class="hint-symbol">↗</span> Tocá una calle del mapa para plantar tu semilla donde quieras.</div>
         </div>
         <div class="field slider-field">
-          <div class="field-label"><label for="radius">Escala de exploración</label><output id="radiusValue">700 m</output></div>
+          <div class="field-label"><label for="radius">Espacio para crecer</label><output id="radiusValue">700 m</output></div>
           <input id="radius" type="range" min="350" max="1300" step="50" value="700" />
-          <div class="range-labels"><span>Entorno cercano</span><span>Red extensa</span></div>
+          <div class="range-labels"><span>Ramas cortas</span><span>Ramas extensas</span></div>
         </div>
         <div class="field slider-field">
-          <div class="field-label"><label for="branching">Intensidad de bifurcación</label><output id="branchValue">Media</output></div>
+          <div class="field-label"><label for="branching">Cantidad de bifurcaciones</label><output id="branchValue">Media</output></div>
           <input id="branching" type="range" min="1" max="5" step="1" value="3" />
           <div class="range-labels"><span>Menos ramas</span><span>Más ramas</span></div>
         </div>
-        <div class="section-heading generate-heading"><span class="section-index">02</span><span>Hacer crecer la red</span></div>
-        <button id="generate" type="button" class="primary-btn"><span class="btn-icon">✳</span><span id="generateLabel">Generar recorrido</span><span class="btn-arrow">↗</span></button>
+        <div class="section-heading generate-heading"><span class="section-index">02</span><span>Hacer crecer las ramas</span></div>
+        <button id="generate" type="button" class="primary-btn"><span class="btn-icon">❧</span><span id="generateLabel">Hacer crecer las ramas</span><span class="btn-arrow">↗</span></button>
         <div class="button-row">
-          <button id="pause" type="button" class="ghost-btn" disabled>Ⅱ <span>Pausar</span></button>
-          <button id="clear" type="button" class="ghost-btn" disabled>↺ <span>Limpiar</span></button>
+          <button id="pause" type="button" class="ghost-btn" disabled>Ⅱ <span>Pausar crecimiento</span></button>
+          <button id="clear" type="button" class="ghost-btn" disabled>↺ <span>Reiniciar crecimiento</span></button>
         </div>
         <div class="status-panel" role="status" aria-live="polite">
           <span id="statusLight" class="status-light"></span>
-          <div><div id="statusTitle" class="status-title">Listo para explorar</div><div id="statusDetail" class="status-detail">La red empieza en Recoleta.</div></div>
+          <div><div id="statusTitle" class="status-title">Tu semilla está lista</div><div id="statusDetail" class="status-detail">Elegí un lugar y hacé crecer las primeras ramas.</div></div>
         </div>
 
-        <div class="section-heading collective-heading"><span class="section-index">03</span><span>Archivo colectivo</span><span class="soon">PRÓXIMA ETAPA</span></div>
-        <p class="collective-text">Más adelante, cada punto de la red podrá reunir fotos, videos y relatos aportados por distintas personas.</p>
+        <div class="section-heading collective-heading"><span class="section-index">03</span><span>Las hojas del árbol</span><span class="soon">PRÓXIMA ETAPA</span></div>
+        <p class="collective-text">Próximamente, las fotos, videos y relatos de quienes recorran las ramas serán las <strong>hojas</strong> de este árbol colectivo.</p>
       </div>
 
       <footer class="sidebar-footer">
-        <span>Un experimento entre azar, naturaleza y ciudad.</span>
-        <span>© <span id="year">2026</span> · DERIVA</span>
+        <span>Una semilla. Muchas direcciones. Ningún árbol igual.</span>
+        <span>© <span id="year">2026</span> · ÁRBOL DERIVADO</span>
       </footer>
     </aside>
 
     <main class="map-area">
       <div id="map" role="application" aria-label="Mapa interactivo de calles y recorridos"></div>
-      <div class="map-top-left"><div class="map-heading"><span class="small-cross">✳</span><span id="placeName">RECOLETA, BUENOS AIRES</span></div><p>Hacé clic en el mapa para cambiar el punto de inicio</p></div>
-      <button class="map-center-button" id="centerMap" type="button" title="Centrar en el origen"><span>⌖</span> Centrar origen</button>
-      <div class="legend" aria-label="Leyenda del mapa"><span><i class="legend-line"></i> Red generada</span><span><i class="legend-dot"></i> Origen</span></div>
+      <div class="map-top-left"><div class="map-heading"><span class="small-cross">✦</span><span id="placeName">RECOLETA, BUENOS AIRES</span></div><p>Tocá una calle para plantar tu semilla</p></div>
+      <button class="map-center-button" id="centerMap" type="button" title="Volver a la semilla"><span>⌖</span> Ver semilla</button>
+      <div class="legend" aria-label="Leyenda del mapa"><span><i class="legend-line"></i> Ramas</span><span><i class="legend-dot"></i> Semilla</span></div>
       <div class="floating-bottom">
         <div class="stats">
-          <div class="stat"><span class="stat-label">TRAMOS</span><strong id="edgesCount">00</strong></div>
-          <div class="stat"><span class="stat-label">BIFURCACIONES</span><strong id="forksCount">00</strong></div>
-          <div class="stat"><span class="stat-label">LONGITUD DE LA RED</span><strong id="lengthCount">0 m</strong></div>
+          <div class="stat"><span class="stat-label">TRAMOS CRECIDOS</span><strong id="edgesCount">00</strong></div>
+          <div class="stat"><span class="stat-label">NUEVAS RAMAS</span><strong id="forksCount">00</strong></div>
+          <div class="stat"><span class="stat-label">EXTENSIÓN DEL ÁRBOL</span><strong id="lengthCount">0 m</strong></div>
         </div>
-        <button id="export" type="button" class="export-btn" disabled title="Descargar los tramos trazados como GeoJSON"><span class="export-symbol">↓</span><span>Exportar red</span></button>
+        <button id="export" type="button" class="export-btn" disabled title="Descargar los tramos trazados como GeoJSON"><span class="export-symbol">↓</span><span>Guardar ramas</span></button>
       </div>
-      <div class="map-note">La red está inspirada en procesos ramificados: no es un itinerario de navegación ni una simulación científica exacta de DLA.</div>
+      <div class="map-note">Las ramas son una exploración artística: no reemplazan rutas de navegación ni simulan de forma exacta la DLA.</div>
     </main>
   </div>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>

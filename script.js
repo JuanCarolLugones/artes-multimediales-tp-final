@@ -1,6 +1,6 @@
 'use strict';
 
-// DERIVA — Prototipo 04. Redes ramificadas construidas con las calles de los mosaicos vectoriales del mapa.
+// ÁRBOL DERIVADO — una cartografía ramificada construida con las calles de los mosaicos vectoriales del mapa.
 // El modelo es INSPIRADO en ramificaciones estocásticas, NO es la DLA física de Witten y Sander.
 // Tampoco es un motor de navegación: no evalúa cortes, obras, seguridad ni accesibilidad real.
 
@@ -80,7 +80,7 @@ if (typeof L === 'undefined' || typeof L.maplibreGL !== 'function') {
     gl.on('load', () => { mapLoaded = true; });
     gl.on('error', (event) => {
       if (!mapLoaded) {
-        console.warn('DERIVA: no se pudo cargar el fondo cartográfico', event?.error || event);
+        console.warn('Árbol Derivado: no se pudo cargar el fondo cartográfico', event?.error || event);
         setStatus('Error al cargar el mapa', 'Verificá tu conexión a internet y volvé a abrir la página.', 'error');
       }
     });
@@ -90,17 +90,17 @@ if (typeof L === 'undefined' || typeof L.maplibreGL !== 'function') {
   }
   state.layerGroup = L.featureGroup().addTo(map);
   state.originMarker = L.marker(state.origin, {
-    icon: L.divIcon({className: '', html: '<div class="origin-marker" aria-label="Origen"></div>', iconSize: [21,21], iconAnchor: [10,10]}),
-    title: 'Punto de inicio'
+    icon: L.divIcon({className: '', html: '<div class="origin-marker" aria-label="Semilla"><span class="seed-sprout">✦</span></div>', iconSize: [28,28], iconAnchor: [14,14]}),
+    title: 'Semilla: punto donde comienza el crecimiento'
   }).addTo(map);
-  state.radiusCircle = L.circle(state.origin, {radius: Number(ui.radius.value), color: '#148a6d', weight: 1, opacity: .38, dashArray: '5 8', fillColor: '#7dcfa5', fillOpacity: .05, interactive: false}).addTo(map);
+  state.radiusCircle = L.circle(state.origin, {radius: Number(ui.radius.value), color: '#728f60', weight: 1, opacity: .55, dashArray: '5 8', fillColor: '#a4b47a', fillOpacity: .075, interactive: false}).addTo(map);
   map.on('click', event => {
     if (state.working || state.running) {
-      setStatus('Generación en curso', 'Pausá o limpiá la red antes de cambiar el punto.', 'busy');
+      setStatus('El árbol está creciendo', 'Pausá el crecimiento antes de mover la semilla.', 'busy');
       return;
     }
     ui.zone.value = 'custom';
-    setOrigin([event.latlng.lat, event.latlng.lng], 'PUNTO PERSONALIZADO', false);
+    setOrigin([event.latlng.lat, event.latlng.lng], 'SEMILLA PLANTADA EN EL MAPA', false);
   });
   restoreSaved();
 }
@@ -117,13 +117,13 @@ function setOrigin(point, title, move = true) {
     if (move) map.setView(point, 15);
   }
   ui.placeName.textContent = title;
-  setStatus('Origen seleccionado', 'Presioná «Generar recorrido» para empezar.');
+  setStatus('Semilla plantada', 'Presioná «Hacer crecer las ramas» para empezar.');
 }
 
 ui.zone.addEventListener('change', () => {
   const zone = ZONES[ui.zone.value];
   if (!zone) {
-    setStatus('Elegí un punto', 'Tocá el mapa para indicar dónde comenzar.');
+    setStatus('Elegí dónde plantar', 'Tocá el mapa para ubicar la semilla.');
     return;
   }
   setOrigin(zone.point, zone.label);
@@ -143,14 +143,14 @@ ui.generate.addEventListener('click', generate);
 ui.pause.addEventListener('click', () => {
   if (!state.running) return;
   state.paused = !state.paused;
-  ui.pause.querySelector('span').textContent = state.paused ? 'Continuar' : 'Pausar';
+  ui.pause.querySelector('span').textContent = state.paused ? 'Seguir creciendo' : 'Pausar crecimiento';
   ui.pause.firstChild.textContent = state.paused ? '▷ ' : 'Ⅱ ';
-  setStatus(state.paused ? 'Red en pausa' : 'La red está creciendo', state.paused ? 'Podés continuar cuando quieras.' : 'Las ramas avanzan por las calles.', state.paused ? 'ready' : 'busy');
+  setStatus(state.paused ? 'Crecimiento en pausa' : 'Las ramas están creciendo', state.paused ? 'Podés reanudar cuando quieras.' : 'El árbol se expande siguiendo las calles.', state.paused ? 'ready' : 'busy');
 });
 ui.clear.addEventListener('click', () => {
   state.requestId++;
   clearDrawing(true);
-  setStatus('Lienzo limpio', 'Podés generar una red nueva desde este origen.');
+  setStatus('La semilla sigue en su lugar', 'Las ramas se retiraron. Podés hacerlas crecer de nuevo.');
 });
 ui.export.addEventListener('click', exportGeoJSON);
 
@@ -161,10 +161,10 @@ function stopAnimation() {
   state.running = false;
   state.working = false;
   ui.pause.disabled = true;
-  ui.pause.querySelector('span').textContent = 'Pausar';
+  ui.pause.querySelector('span').textContent = 'Pausar crecimiento';
   ui.pause.firstChild.textContent = 'Ⅱ ';
   ui.generate.disabled = !map;
-  ui.generateLabel.textContent = 'Generar recorrido';
+  ui.generateLabel.textContent = 'Hacer crecer las ramas';
 }
 function clearDrawing(removeSaved = false) {
   stopAnimation();
@@ -175,7 +175,7 @@ function clearDrawing(removeSaved = false) {
   state.graphStartId = null;
   ui.clear.disabled = true; ui.export.disabled = true;
   updateStats();
-  if (removeSaved) try { localStorage.removeItem('deriva-v1'); } catch (_e) {}
+  if (removeSaved) try { localStorage.removeItem('arbol-derivado-v1'); localStorage.removeItem('deriva-v1'); } catch (_e) {}
 }
 
 function networkKey(origin, radius) { return `${origin[0].toFixed(4)},${origin[1].toFixed(4)},${radius}`; }
@@ -206,7 +206,7 @@ function roadsInVisibleMap() {
     try {
       const result = vectorMap.querySourceFeatures(source, {sourceLayer});
       if (result?.length) features.push(...result);
-    } catch (err) { console.warn('DERIVA: capa de calles no disponible', sourceLayer, err); }
+    } catch (err) { console.warn('Árbol Derivado: capa de calles no disponible', sourceLayer, err); }
   }
   return features;
 }
@@ -404,9 +404,9 @@ function updateButtons() {
   ui.export.disabled = !state.edges.length;
 }
 function drawEdge(a, b, name) {
-  const line = L.polyline([a,b], {color:'#0e8267', weight:5, opacity:.92, lineCap:'round', lineJoin:'round'});
+  const line = L.polyline([a,b], {color:'#638950', weight:5, opacity:.95, lineCap:'round', lineJoin:'round'});
   const safeName = String(name).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
-  line.bindPopup(`<div class="segment-popup"><b>${safeName}</b><span>Tramo de la red generada</span></div>`);
+  line.bindPopup(`<div class="segment-popup"><b>${safeName}</b><span>Una rama de este árbol urbano</span></div>`);
   line.addTo(state.layerGroup);
   state.lineLayers.push(line);
 }
@@ -471,7 +471,7 @@ function finishGrowth() {
   stopAnimation();
   updateButtons(); updateStats();
   saveLocal();
-  setStatus('La red terminó de crecer', `${state.edges.length} tramos conectados a partir del origen. Podés generar otra variante.`, 'ready');
+  setStatus('El árbol terminó de crecer', `${state.edges.length} tramos nacieron de tu semilla. Podés crear otra variante.`, 'ready');
 }
 async function generate() {
   if (!map || state.working || state.running) return;
@@ -483,9 +483,9 @@ async function generate() {
   clearDrawing(false);
   state.working = true;
   ui.generate.disabled = true;
-  ui.generateLabel.textContent = 'Preparando calles…';
+  ui.generateLabel.textContent = 'Preparando el terreno…';
   ui.clear.disabled = false;
-  setStatus('Leyendo el mapa de calles', networkCached ? 'Preparando una nueva variante…' : 'Usando las calles que ya aparecen en el mapa…', 'busy');
+  setStatus('Preparando el terreno', networkCached ? 'Buscando nuevas direcciones para crecer…' : 'Identificando las calles por donde pueden crecer las ramas…', 'busy');
   try {
     const network = await getRoadGraphFromMap(origin, radius, requestId);
     if (requestId !== state.requestId || !network) return;
@@ -501,25 +501,25 @@ async function generate() {
     state.working = false;
     state.running = true;
     ui.generate.disabled = true;
-    ui.generateLabel.textContent = 'Generando…';
+    ui.generateLabel.textContent = 'Las ramas están creciendo…';
     ui.pause.disabled = false;
-    setStatus('La red está creciendo', `Usando las calles visibles del mapa. Objetivo: ${state.targetCount} tramos.`, 'busy');
+    setStatus('Las ramas están creciendo', `La semilla dará origen a una red de hasta ${state.targetCount} tramos.`, 'busy');
     state.timer = setInterval(growthTick, 85);
   } catch (error) {
     if (requestId !== state.requestId) return;
     stopAnimation(); updateButtons();
-    console.warn('DERIVA: no fue posible construir la red', error);
-    setStatus('No se pudo generar la red', (error?.message || 'No se encuentran datos de calles en el mapa.') + ' Comprobá que el mapa esté visible y recargá.', 'error');
+    console.warn('Árbol Derivado: no fue posible construir la red', error);
+    setStatus('Las ramas no pudieron crecer', (error?.message || 'No se encuentran datos de calles en el mapa.') + ' Comprobá que el mapa esté visible y recargá.', 'error');
   }
 }
 function saveLocal() {
   try {
-    localStorage.setItem('deriva-v1', JSON.stringify({origin:state.origin, zone: ui.zone.value, radius:ui.radius.value, branching:ui.branching.value, edges: state.edges, forks:state.forks, savedAt:Date.now()}));
+    localStorage.setItem('arbol-derivado-v1', JSON.stringify({origin:state.origin, zone: ui.zone.value, radius:ui.radius.value, branching:ui.branching.value, edges: state.edges, forks:state.forks, savedAt:Date.now()}));
   } catch (_e) { /* Privacidad/almacenamiento restringido: no bloquea la experiencia. */ }
 }
 function restoreSaved() {
   try {
-    const raw = localStorage.getItem('deriva-v1');
+    const raw = localStorage.getItem('arbol-derivado-v1') || localStorage.getItem('deriva-v1');
     if (!raw) return;
     const saved = JSON.parse(raw);
     if (!Array.isArray(saved?.edges) || !Array.isArray(saved?.origin)) return;
@@ -528,7 +528,7 @@ function restoreSaved() {
     ui.branching.value = saved.branching || 3; ui.branching.dispatchEvent(new Event('input'));
     ui.zone.value = saved.zone || 'custom';
     state.origin = saved.origin;
-    ui.placeName.textContent = ZONES[saved.zone]?.label || 'PUNTO PERSONALIZADO';
+    ui.placeName.textContent = ZONES[saved.zone]?.label || 'SEMILLA PLANTADA EN EL MAPA';
     state.originMarker.setLatLng(saved.edges[0].a);
     state.radiusCircle.setLatLng(state.origin);
     map.setView(state.origin, 15);
@@ -541,19 +541,19 @@ function restoreSaved() {
       drawEdge(segment.a,segment.b,segment.name || 'Calle');
     }
     updateButtons(); updateStats();
-    setStatus('Recuperamos tu última red', `${state.edges.length} tramos guardados en este navegador.`);
+    setStatus('Tu árbol volvió a aparecer', `${state.edges.length} tramos recuperados de este navegador.`);
   } catch (_e) { /* El prototipo puede seguir sin los datos previos. */ }
 }
 function exportGeoJSON() {
   if (!state.edges.length) return;
   const features = state.edges.map((e, index) => ({
-    type:'Feature', properties:{index:index + 1, calle:e.name, longitud_m:Math.round(e.meters*10)/10, origen:'DERIVA - prototipo'},
+    type:'Feature', properties:{index:index + 1, calle:e.name, longitud_m:Math.round(e.meters*10)/10, origen:'Árbol Derivado - prototipo'},
     geometry:{type:'LineString',coordinates:[[e.a[1],e.a[0]],[e.b[1],e.b[0]]]}
   }));
-  const content = JSON.stringify({type:'FeatureCollection',name:'DERIVA - red de calles',source:'© OpenStreetMap contributors',features}, null, 2);
+  const content = JSON.stringify({type:'FeatureCollection',name:'Árbol Derivado - ramas urbanas',source:'© OpenStreetMap contributors',features}, null, 2);
   const url = URL.createObjectURL(new Blob([content],{type:'application/geo+json'}));
-  const a = document.createElement('a'); a.href = url; a.download = 'deriva-red.geojson';
+  const a = document.createElement('a'); a.href = url; a.download = 'arbol-derivado-ramas.geojson';
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url),1000);
-  setStatus('Red exportada', 'Se descargó un archivo GeoJSON con los tramos generados.');
+  setStatus('Ramas guardadas', 'Descargaste un archivo GeoJSON con los caminos que crecieron.');
 }
